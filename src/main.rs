@@ -1,3 +1,11 @@
+use bevy::prelude::*;
+use bevy_xpbd_3d::prelude::*;
+
+mod environment;
+mod ui;
+
 fn main() {
-    println!("Hello, world!");
+    App::new()
+        .add_plugins((DefaultPlugins, PhysicsPlugins::default()))
+        .run();
 }
