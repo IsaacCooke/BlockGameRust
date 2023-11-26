@@ -8,4 +8,14 @@ impl Plugin for LightingPlugin {
     }
 }
 
-fn setup(mut commands: Commands) {}
+fn setup(mut commands: Commands) {
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            color: Color::WHITE,
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_xyz(0.0, 8.0, 0.0),
+        ..default()
+    });
+}
