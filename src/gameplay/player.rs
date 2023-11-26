@@ -7,12 +7,30 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup);
         app.add_systems(PhysicsSchedule, movement.before(PhysicsStepSet::BroadPhase));
+        app.add_systems(Update, sync_player_camera);
     }
 }
 
 #[derive(Component)]
 pub struct Player {
     pub health: i32,
+}
+
+#[derive(Component)]
+struct PanOrbitCamera {
+    pub focus: Vec3,
+    pub radius: f32,
+    pub upside_down: bool,
+}
+
+impl Default for PanOrbitCamera {
+    fn default() -> Self {
+        PanOrbitCamera {
+            focus: Vec3::ZERO,
+            radius: 5.0,
+            upside_down: false,
+        }
+    }
 }
 
 fn setup(
@@ -49,11 +67,39 @@ fn setup(
         Player { health: 100 },
     ));
 
+    let translation = Vec3::new(-2.0, 2.5, 5.0);
+    let radius = translation.length();
+
     // Camera
-    commands.spawn(Camera3dBundle {
-        transform: Transform::from_xyz(3.0, 5.0, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    });
+    commands.spawn((
+        Camera3dBundle {
+            transform: Transform::from_translation(translation).looking_at(Vec3::ZERO, Vec3::Y),
+            ..default()
+        },
+        PanOrbitCamera {
+            radius,
+            ..default()
+        },
+    ));
+}
+
+fn sync_player_camera(
+    player: Query<&Transform, With<Player>>,
+    mut camera: Query<(&mut PanOrbitCamera, &mut Transform), Without<Player>>,
+) {
+    let Ok(player) = player.get_single() else {
+        return;
+    };
+    let Ok((mut camera, mut camera_transform)) = camera.get_single_mut() else {
+        return;
+    };
+
+    let delta = player.translation - camera.focus;
+
+    if delta != Vec3::ZERO {
+        camera.focus = player.translation;
+        camera_transform.translation += delta;
+    }
 }
 
 fn movement(
