@@ -39,7 +39,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Player
-    let player = commands.spawn((
+    commands.spawn((
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Capsule {
                 radius: 0.4,
@@ -67,7 +67,7 @@ fn setup(
         Player { health: 100 },
     ));
 
-    let translation = Vec3::new(-2.0, 2.5, 5.0);
+    let translation = Vec3::new(0.0, 2.5, 5.0);
     let radius = translation.length();
 
     // Camera
